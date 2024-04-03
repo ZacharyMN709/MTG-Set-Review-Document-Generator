@@ -46,7 +46,7 @@ class Scryfall:
         data = cls.request(url).json()
 
         if data["object"] == 'card':
-            return data["object"]
+            return data
         else:
             logging.warning(f"Could not find card for '{url}'")
             return None
