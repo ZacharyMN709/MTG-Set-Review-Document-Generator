@@ -9,7 +9,7 @@ from time import sleep
 class Scryfall:
     @classmethod
     @cache
-    def _request(cls, url: str) -> requests.Response:
+    def request(cls, url: str) -> requests.Response:
         """
         Request data from a url, with an automatic delay that Scryfall requests.
         :param url: The url to request data from.
@@ -29,7 +29,7 @@ class Scryfall:
         cards = dict()
         url = f"https://api.scryfall.com/cards/search?format=json&order=set&q={query}"
         while url:
-            data = cls._request(url).json()
+            data = cls.request(url).json()
             url = data.get('next_page', None)
             cards |= {card['name']: card for card in data['data']}
 
@@ -43,11 +43,10 @@ class Scryfall:
         :return: The card data, if found.
         """
         url = f"https://api.scryfall.com/cards/{query}"
-        data = cls._request(url).json()
+        data = cls.request(url).json()
 
         if data["object"] == 'card':
             return data["object"]
         else:
             logging.warning(f"Could not find card for '{url}'")
             return None
-
