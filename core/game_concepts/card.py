@@ -35,14 +35,10 @@ class Card:
         if face is None:
             return None
 
-        try:
-            uris = ['large', 'border_crop', 'normal', 'small', 'art_crop']
-            for uri in uris:
-                if uri in face["image_uris"]:
-                    return face["image_uris"][uri]
-        except KeyError:
-            print(face)
-            return None
+        uris = ['large', 'border_crop', 'normal', 'small', 'art_crop']
+        for uri in uris:
+            if uri in face["image_uris"]:
+                return face["image_uris"][uri]
 
     def __init__(self, json: dict):
         self._json = json
@@ -59,6 +55,7 @@ class Card:
         self.rarity = self._parse_from_json('rarity')
         self.full_name = self._parse_from_json('name')
         self.name = self._front_face.get('name', self.full_name)
+        self.layout = self._parse_from_json('layout')
 
         self.mana_cost = self._parse_from_json('mana_cost', '')
         self.cmc = self._parse_from_json('cmc', 0)
@@ -72,10 +69,12 @@ class Card:
         self.types = self.all_types & TYPES
         self.subtypes = self.all_types & SUBTYPES
 
-        # TODO: Handle this better based on the card frame. Adventures and split cards don't play nice with this logic.
-
-        self.front_image_url = self._get_image_url(self._front_face)
-        self.back_image_url = self._get_image_url(self._back_face)
+        if self.layout in {'adventure', 'split'}:
+            self.front_image_url = self._get_image_url(self._json)
+            self.back_image_url = None
+        else:
+            self.front_image_url = self._get_image_url(self._front_face)
+            self.back_image_url = self._get_image_url(self._back_face)
 
     @property
     def card_url(self) -> str:
@@ -106,7 +105,7 @@ class Card:
         return self.full_name
 
     def __repr__(self):
-        return f"{self.name:35} - {self.mana_cost:25} ({self.expansion}:{self.number:3} {self.rarity})"
+        return f"{self.full_name:35} - {self.mana_cost:25} ({self.expansion}:{self.number:3} {self.rarity})"
 
 
 if __name__ == "__main__":
@@ -131,14 +130,9 @@ if __name__ == "__main__":
 
 
     def make_card(card_name):
-        card_data = card_cache.get_card_data(card_name)
-        card = Card(card_data)
+        card = card_cache.get_card_data(card_name)
         print_card(card)
         return card
 
 
-    make_card("Joyful Stormsculptor")
-    make_card("Captive Weird")
-    make_card("Invasion of Kaladesh")
-
-    pass
+    make_card("Crime")

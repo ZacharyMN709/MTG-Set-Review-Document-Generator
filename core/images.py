@@ -15,6 +15,9 @@ class ImageProcessor:
 
     @classmethod
     def generate_slide_image(cls, card: Card) -> Image.Image:
+        if not card.back_image_url:
+            return cls.get_face_image(card.front_image_url)
+
         front_image = cls.get_face_image(card.front_image_url)
         back_image = cls.get_face_image(card.back_image_url)
 
