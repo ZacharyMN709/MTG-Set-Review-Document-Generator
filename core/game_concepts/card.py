@@ -25,62 +25,15 @@ class Card:
     front_image_url: str
     back_image_url: Optional[str]
 
-    @classmethod
-    def _get_image_url(cls, face: Optional[dict]) -> Optional[str]:
-        """
-        Get the highest resolution image available from a card face
-        :param face: The card or card face data.
-        :return: A url to the image.
-        """
-        if face is None:
-            return None
-
-        uris = ['large', 'border_crop', 'normal', 'small', 'art_crop']
-        for uri in uris:
-            if uri in face["image_uris"]:
-                return face["image_uris"][uri]
-
     def __init__(self, json: dict):
         self._json = json
-        if 'card_faces' in self._json:
-            self._front_face = self._json['card_faces'][0]
-            self._back_face = self._json['card_faces'][1]
-        else:
-            self._front_face = self._json
-            self._back_face = None
+        self._populate_card_face_data()
+        self._populate_collector_data()
+        self._populate_cost_data()
+        self._populate_types()
+        self._populate_image_data()
 
-        self.scryfall_id = json['id']
-        self.expansion = json['set'].upper()
-        self.number = self._parse_from_json('collector_number')
-        self.rarity = self._parse_from_json('rarity')
-        self.full_name = self._parse_from_json('name')
-        self.name = self._front_face.get('name', self.full_name)
-        self.layout = self._parse_from_json('layout')
-
-        self.mana_cost = self._parse_from_json('mana_cost', '')
-        self.cmc = self._parse_from_json('cmc', 0)
-        self.colors = parse_color_list(self._parse_from_json('colors', ''))
-        self.color_identity = parse_color_list(self._parse_from_json('color_identity', ''))
-        self.casting_identity = get_color_identity(self.mana_cost)
-
-        self.type_line = self._parse_from_json('type_line', '')
-        self.all_types = set(self.type_line.split(' ')) - {'—', '//'}
-        self.supertypes = self.all_types & SUPERTYPES
-        self.types = self.all_types & TYPES
-        self.subtypes = self.all_types & SUBTYPES
-
-        if self.layout in {'adventure', 'split'}:
-            self.front_image_url = self._get_image_url(self._json)
-            self.back_image_url = None
-        else:
-            self.front_image_url = self._get_image_url(self._front_face)
-            self.back_image_url = self._get_image_url(self._back_face)
-
-    @property
-    def card_url(self) -> str:
-        """Shortened link to the Scryfall page for the card"""
-        return f"https://scryfall.com/card/{self.expansion.lower()}/{self.number}"
-
+    # region Initialization
     def _parse_from_json(self, key, default=None):
         # Attempt to get the value from general card information.
         val = self._json.get(key)
@@ -100,6 +53,70 @@ class Card:
         if key not in ['mana_cost', 'colors']:  # pragma: nocover
             logging.debug(f"'{key}' is empty for card '{self.name}'")
         return default
+
+    @classmethod
+    def _get_image_url(cls, face: Optional[dict]) -> Optional[str]:
+        """
+        Get the highest resolution image available from a card face
+        :param face: The card or card face data.
+        :return: A url to the image.
+        """
+        if face is None:
+            return None
+
+        uris = ['large', 'border_crop', 'normal', 'small', 'art_crop']
+        for uri in uris:
+            if uri in face["image_uris"]:
+                return face["image_uris"][uri]
+
+    def _populate_card_face_data(self):
+        if 'card_faces' in self._json:
+            self._front_face = self._json['card_faces'][0]
+            self._back_face = self._json['card_faces'][1]
+        else:
+            self._front_face = self._json
+            self._back_face = None
+
+        self.layout = self._parse_from_json('layout')
+
+    def _populate_collector_data(self):
+        self.scryfall_id = self._json['id']
+        self.expansion = self._json['set'].upper()
+        self.number = self._parse_from_json('collector_number')
+        self.rarity = self._parse_from_json('rarity')
+        self.full_name = self._parse_from_json('name')
+        if self.layout in {'split'}:
+            self.name = self.full_name
+        else:
+            self.name = self._front_face.get('name', self.full_name)
+
+    def _populate_cost_data(self):
+        self.mana_cost = self._parse_from_json('mana_cost', '')
+        self.cmc = self._parse_from_json('cmc', 0)
+        self.colors = parse_color_list(self._parse_from_json('colors', ''))
+        self.color_identity = parse_color_list(self._parse_from_json('color_identity', ''))
+        self.casting_identity = get_color_identity(self.mana_cost)
+
+    def _populate_types(self):
+        self.type_line = self._parse_from_json('type_line', '')
+        self.all_types = set(self.type_line.split(' ')) - {'—', '//'}
+        self.supertypes = self.all_types & SUPERTYPES
+        self.types = self.all_types & TYPES
+        self.subtypes = self.all_types & SUBTYPES
+
+    def _populate_image_data(self):
+        if self.layout in {'adventure', 'split'}:
+            self.front_image_url = self._get_image_url(self._json)
+            self.back_image_url = None
+        else:
+            self.front_image_url = self._get_image_url(self._front_face)
+            self.back_image_url = self._get_image_url(self._back_face)
+    # endregion Initialization
+
+    @property
+    def card_url(self) -> str:
+        """Shortened link to the Scryfall page for the card"""
+        return f"https://scryfall.com/card/{self.expansion.lower()}/{self.number}"
 
     def __str__(self):
         return self.full_name
