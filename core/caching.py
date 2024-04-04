@@ -54,6 +54,9 @@ class CardCache:
         if card.name in self._card_cache and not overwrite:
             return False
 
+        if card.name in {'Plains', 'Island', 'Swamp', 'Mountain', 'Forest'}:
+            return False
+
         logging.debug(f"Adding '{card.name}' to `CARD_CACHE`")
         self._card_cache[card.name] = card
 
