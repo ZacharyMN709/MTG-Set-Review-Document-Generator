@@ -96,6 +96,12 @@ class Card:
             logging.debug(f"'{key}' is empty for card '{self.name}'")
         return default
 
+    def __str__(self):
+        return self.full_name
+
+    def __repr__(self):
+        return f"{self.name:35} - {self.mana_cost:20} ({self.expansion}:{self.number:3} {self.rarity})"
+
 
 if __name__ == "__main__":
     from core.caching import CardCache
