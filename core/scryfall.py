@@ -5,6 +5,8 @@ import logging
 import requests
 from time import sleep
 
+from core.game_concepts.card import Card
+
 
 class Scryfall:
     @classmethod
@@ -20,7 +22,7 @@ class Scryfall:
         return response
 
     @classmethod
-    def scryfall_search(cls, query: str) -> dict[str, dict]:
+    def scryfall_search(cls, query: str) -> dict[str, Card]:
         """
         Search scryfall for multiple cards, populating the card cache with the results.
         :param query: The query to use, formatted for url.
@@ -29,14 +31,14 @@ class Scryfall:
         cards = dict()
         url = f"https://api.scryfall.com/cards/search?format=json&order=set&q={query}"
         while url:
-            data = cls.request(url).json()
-            url = data.get('next_page', None)
-            cards |= {card['name']: card for card in data['data']}
+            all_data = cls.request(url).json()
+            url = all_data.get('next_page', None)
+            cards |= {card_data['name']: Card(card_data) for card_data in all_data['data']}
 
         return cards
 
     @classmethod
-    def scryfall_card(cls, query: str) -> Optional[dict]:
+    def scryfall_card(cls, query: str) -> Optional[Card]:
         """
         Search scryfall for a specific card, populating the card cache with the results.
         :param query: The url parameter/path for the card.
@@ -46,7 +48,7 @@ class Scryfall:
         data = cls.request(url).json()
 
         if data["object"] == 'card':
-            return data
+            return Card(data)
         else:
             logging.warning(f"Could not find card for '{url}'")
             return None
