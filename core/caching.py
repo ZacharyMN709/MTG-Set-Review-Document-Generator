@@ -114,3 +114,9 @@ class CardCache:
         card = Scryfall.scryfall_card(f"{expansion.lower()}/{number}")
         self._add_to_cache(card)
         return card
+
+    def card_list(self, *, expansion: Optional[str] = None):
+        if expansion:
+            return [card for card in self._card_cache.values() if card.expansion == expansion.upper()]
+        else:
+            return list(self._card_cache.values())
