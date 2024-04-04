@@ -27,27 +27,39 @@ class PowerPointGenerator:
         path.mkdir(parents=True, exist_ok=True)
         path.joinpath()
 
+        day_one_file_name = f"{self.expansion} - Commons and Uncommons.pptx"
         pptx.gen_powerpoint(
-            os.path.join(output_dir, f"{self.expansion} - Commons and Uncommons.pptx"),
+            os.path.join(output_dir, day_one_file_name),
             ImageProcessor.image_generator(self.day_one_cards)
         )
+        print(f"Created file '{day_one_file_name}'!")
+
+        day_two_file_name = f"{self.expansion} - Rares and Mythics.pptx"
         pptx.gen_powerpoint(
-            os.path.join(output_dir, f"{self.expansion} - Rares and Mythics.pptx"),
+            os.path.join(output_dir, day_two_file_name),
             ImageProcessor.image_generator(self.day_two_cards)
         )
+        print(f"Created file '{day_two_file_name}'!")
 
     def sorted_card_list(self) -> list[Card]:
         return self.day_two_cards + self.day_two_cards
 
 
-def main(expansion: str, bonus_sheet: Optional[str], *queries: str) -> None:
+def main(
+        expansion: str,
+        bonus_sheet: Optional[str],
+        *queries: str,
+        print_card_list: bool = False
+) -> PowerPointGenerator:
     cache = CardCache.from_queries(*queries)
     generator = PowerPointGenerator(expansion, bonus_sheet, cache)
 
-    for card in generator.sorted_card_list():
-        print(repr(card))
+    if print_card_list:
+        for card in pptx_generator.sorted_card_list():
+            print(repr(card))
 
     generator.generate_powerpoint(os.path.join('Generated Documents', expansion.upper()))
+    return generator
 
 
 if __name__ == "__main__":
@@ -60,5 +72,7 @@ if __name__ == "__main__":
         '(set:spg and date=otj) unique:cards'
     ]
 
-    main(MAIN_EXPANSION, BONUS_SHEET, *QUERIES)
+    pptx_generator = main(MAIN_EXPANSION, BONUS_SHEET, *QUERIES)
+
+
 
