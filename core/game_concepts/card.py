@@ -106,7 +106,7 @@ class Card:
         return self.full_name
 
     def __repr__(self):
-        return f"{self.name:35} - {self.mana_cost:20} ({self.expansion}:{self.number:3} {self.rarity})"
+        return f"{self.name:35} - {self.mana_cost:25} ({self.expansion}:{self.number:3} {self.rarity})"
 
 
 if __name__ == "__main__":

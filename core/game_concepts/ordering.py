@@ -1,7 +1,8 @@
-from typing import TypeVar, Iterable
+from typing import TypeVar, Optional, Iterable
 
 from itertools import chain
 
+from core.caching import CardCache
 from core.game_concepts.colors import GROUP_COLOR_COMBINATIONS
 from core.game_concepts.card import Card
 
@@ -20,6 +21,11 @@ def weave_lists(l1: list[T], l2: list[T]) -> list[T]:
     return list(chain.from_iterable(zip(l1, l2)))
 
 
+def split_by_rarities(card_list: list[Card]):
+    commons, uncommons, rares, mythics = [[card for card in card_list if card.rarity == rarity] for rarity in RARITIES]
+    return commons, uncommons, rares, mythics
+
+
 def split_by_color(card_list: list[Card]) -> list[list[Card]]:
     def get_by_color(color: str) -> list[Card]:
         return sorted([card for card in card_list if card.casting_identity == color], key=lambda x: x.cmc)
@@ -30,21 +36,44 @@ def split_by_color(card_list: list[Card]) -> list[list[Card]]:
     return [land, colorless] + temp[1:]
 
 
-def gen_set_review_chunks(card_list: list[Card]) -> tuple[list[Card], list[Card], list[Card], list[Card], list[Card]]:
-    commons, uncommons, rares, mythics = [[card for card in card_list if card.rarity == rarity] for rarity in RARITIES]
-    common_sublists = split_by_color(commons)
-    uncommon_sublists = split_by_color(uncommons)
-    rare_sublists = split_by_color(rares + mythics)
+def sort_for_day_one(cards: list[Card]) -> list[Card]:
+    commons, uncommons, _, _ = split_by_rarities(cards)
+    commons_by_color = split_by_color(commons)
+    uncommons_by_color = split_by_color(uncommons)
 
-    lands = flatten_lists([common_sublists[0], uncommon_sublists[0]])
-    colorless = flatten_lists([common_sublists[1], uncommon_sublists[1]])
-    single_colored = flatten_lists(weave_lists(common_sublists[2:7], uncommon_sublists[2:7]))
-    signposts = flatten_lists(weave_lists(common_sublists[7:], uncommon_sublists[7:]))
-    rares_and_mythics = flatten_lists(rare_sublists[2:7] + rare_sublists[0:2] + rare_sublists[7:])
+    lands = flatten_lists([commons_by_color[0], uncommons_by_color[0]])
+    colorless = flatten_lists([commons_by_color[1], uncommons_by_color[1]])
+    single_colored = flatten_lists(weave_lists(commons_by_color[2:7], uncommons_by_color[2:7]))
+    signposts = flatten_lists(weave_lists(commons_by_color[7:], uncommons_by_color[7:]))
 
-    return signposts, colorless, lands, single_colored, rares_and_mythics
+    return signposts + colorless + lands + single_colored
 
 
-def order_for_set_review(card_list: list[Card]) -> list[Card]:
-    return flatten_lists(gen_set_review_chunks(card_list))
+def sort_for_day_two(cards: list[Card]) -> list[Card]:
+    _, _, rares, mythics = split_by_rarities(cards)
+    by_color = split_by_color(rares + mythics)
+    return flatten_lists(by_color[7:] + by_color[2:7] + by_color[0:2])
 
+
+def sort_for_bonus_sheet(cards: list[Card]):
+    return sort_for_day_one(cards) + sort_for_day_two(cards)
+
+
+def order(cache: CardCache, expansion: str, bonus_sheet: Optional[str]) -> tuple[list[Card], list[Card]]:
+    main_set_cards = cache.card_list(expansion)
+
+    if bonus_sheet:
+        bonus_sheet_cards = cache.card_list(bonus_sheet)
+        bonus_sheet_cards = sort_for_bonus_sheet(bonus_sheet_cards)
+    else:
+        bonus_sheet_cards = list()
+
+    the_list_cards = [card for card in cache.card_list() if card.expansion not in {expansion, bonus_sheet, 'SPG'}]
+    the_list_cards = sort_for_bonus_sheet(the_list_cards)
+
+    special_quests = cache.card_list('SPG')
+    special_quests = sort_for_bonus_sheet(special_quests)
+
+    day_one_cards = sort_for_day_one(main_set_cards)
+    day_two_cards = sort_for_day_two(main_set_cards) + bonus_sheet_cards + the_list_cards + special_quests
+    return day_one_cards, day_two_cards
