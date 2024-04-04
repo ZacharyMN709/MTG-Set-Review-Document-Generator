@@ -54,11 +54,9 @@ class CardCache:
         if card.name in self._card_cache and not overwrite:
             return False
 
+        # Explicitly prevent basics from being added.
         if card.name in {'Plains', 'Island', 'Swamp', 'Mountain', 'Forest'}:
             return False
-
-        logging.debug(f"Adding '{card.name}' to `CARD_CACHE`")
-        self._card_cache[card.name] = card
 
         logging.debug(f"Adding '{card.full_name}' to `CARD_CACHE`")
         self._card_cache[card.full_name] = card
@@ -98,6 +96,7 @@ class CardCache:
         self._add_to_cache(card)
         return card
 
+    @cache
     def get_card_data_by_set(self, card_name, expansion, number) -> Optional[Card]:
         """
         Gets data for a card, using its name, set and collector number.
