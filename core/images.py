@@ -23,12 +23,12 @@ class ImageProcessor:
             if uri in face["image_uris"]:
                 return face["image_uris"][uri]
 
-    def get_face_image(self, card_face: dict) -> Image:
+    def get_face_image(self, card_face: dict) -> Image.Image:
         url = self._get_image_url(card_face)
         image_data = Scryfall.request(url).content
         return Image.open(BytesIO(image_data))
 
-    def generate_slide_image(self, card_name: str) -> Image:
+    def generate_slide_image(self, card_name: str) -> Image.Image:
         print(card_name)
         card_data = self.card_cache.get_card_data(card_name)
 

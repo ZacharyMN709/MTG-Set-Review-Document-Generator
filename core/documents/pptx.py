@@ -3,7 +3,7 @@ from typing import Iterable
 from pptx import Presentation as NewPresentation
 from pptx.util import Cm
 from pptx.presentation import Presentation
-from PIL import Image
+from PIL.Image import Image
 import tempfile
 
 SLIDE_HEIGHT = 19.05
