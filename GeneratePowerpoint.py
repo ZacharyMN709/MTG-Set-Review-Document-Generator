@@ -55,8 +55,10 @@ def main(
     generator = PowerPointGenerator(expansion, bonus_sheet, cache)
 
     if print_card_list:
-        for card in pptx_generator.sorted_card_list():
+        print("Cards: ")
+        for card in generator.sorted_card_list():
             print(repr(card))
+        print(" - - - - - - - - - - \n")
 
     generator.generate_powerpoint(os.path.join('Generated Documents', expansion.upper()))
     return generator
@@ -72,7 +74,7 @@ if __name__ == "__main__":
         '(set:spg and date=otj) unique:cards'
     ]
 
-    pptx_generator = main(MAIN_EXPANSION, BONUS_SHEET, *QUERIES)
+    main(MAIN_EXPANSION, BONUS_SHEET, *QUERIES, print_card_list=True)
 
 
 
