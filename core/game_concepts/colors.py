@@ -5,6 +5,17 @@ import re
 
 _mana_symbol_scrub = re.compile('[0-9{}XC]')
 
+GROUP_COLOR_COMBINATIONS: list[str] = [
+    '',
+    'W', 'U', 'B', 'R', 'G',
+    'WU', 'UB', 'BR', 'RG', 'WG',
+    'WB', 'BG', 'UG', 'UR', 'WR',
+    'WUR', 'UBG', 'WBR', 'URG', 'WBG',
+    'WUB', 'UBR', 'BRG', 'WRG', 'WUG',
+    'WUBR', 'WUBG', 'WURG', 'WBRG', 'UBRG',
+    'WUBRG'
+]
+
 
 def get_color_string(text: Optional[str]) -> str:
     """
