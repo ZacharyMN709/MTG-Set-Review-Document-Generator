@@ -22,8 +22,8 @@ class Card:
     supertypes: set[str]
     types: set[str]
     subtypes: set[str]
-    front_image: str
-    back_image: Optional[str]
+    front_image_url: str
+    back_image_url: Optional[str]
 
     @classmethod
     def _get_image_url(cls, face: Optional[dict]) -> Optional[str]:
