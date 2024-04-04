@@ -35,10 +35,14 @@ class Card:
         if face is None:
             return None
 
-        uris = ['large', 'border_crop', 'normal', 'small', 'art_crop']
-        for uri in uris:
-            if uri in face["image_uris"]:
-                return face["image_uris"][uri]
+        try:
+            uris = ['large', 'border_crop', 'normal', 'small', 'art_crop']
+            for uri in uris:
+                if uri in face["image_uris"]:
+                    return face["image_uris"][uri]
+        except KeyError:
+            print(face)
+            return None
 
     def __init__(self, json: dict):
         self._json = json
@@ -67,6 +71,8 @@ class Card:
         self.supertypes = self.all_types & SUPERTYPES
         self.types = self.all_types & TYPES
         self.subtypes = self.all_types & SUBTYPES
+
+        # TODO: Handle this better based on the card frame. Adventures and split cards don't play nice with this logic.
 
         self.front_image_url = self._get_image_url(self._front_face)
         self.back_image_url = self._get_image_url(self._back_face)
