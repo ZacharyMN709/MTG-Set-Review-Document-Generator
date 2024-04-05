@@ -42,7 +42,7 @@ class PowerPointGenerator:
         print(f"Created file '{day_two_file_name}'!")
 
     def sorted_card_list(self) -> list[Card]:
-        return self.day_two_cards + self.day_two_cards
+        return self.day_one_cards + self.day_two_cards
 
 
 def main(
@@ -60,7 +60,7 @@ def main(
             print(repr(card))
         print(" - - - - - - - - - - \n")
 
-    generator.generate_powerpoint(os.path.join('Generated Documents', expansion.upper()))
+    generator.generate_powerpoint(os.path.join('../../Generated Documents', expansion.upper()))
     return generator
 
 
