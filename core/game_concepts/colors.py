@@ -17,6 +17,42 @@ GROUP_COLOR_COMBINATIONS: list[str] = [
 ]
 
 
+SET_REVIEW_COLOR_ORDER: dict[str, int] = {
+    'WU': 0,
+    'UB': 1,
+    'BR': 2,
+    'RG': 3,
+    'WG': 4,
+    'WB': 5,
+    'BG': 6,
+    'UG': 7,
+    'UR': 8,
+    'WR': 9,
+    'WUR': 10,
+    'UBG': 11,
+    'WBR': 12,
+    'URG': 13,
+    'WBG': 14,
+    'WUB': 15,
+    'UBR': 16,
+    'BRG': 17,
+    'WRG': 18,
+    'WUG': 19,
+    'WUBR': 20,
+    'WUBG': 21,
+    'WURG': 22,
+    'WBRG': 23,
+    'UBRG': 24,
+    'WUBRG': 25,
+    '': 26,
+    'W': 27,
+    'U': 28,
+    'B': 29,
+    'R': 30,
+    'G': 31,
+}
+
+
 def get_color_string(text: Optional[str]) -> str:
     """
     Takes in a string, and attempts to convert it to a color string, with some amount

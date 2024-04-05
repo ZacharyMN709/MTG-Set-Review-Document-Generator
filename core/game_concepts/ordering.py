@@ -1,9 +1,10 @@
 from typing import TypeVar, Optional, Iterable
 
 from itertools import chain
+from functools import cmp_to_key
 
 from core.caching import CardCache
-from core.game_concepts.colors import GROUP_COLOR_COMBINATIONS
+from core.game_concepts.colors import GROUP_COLOR_COMBINATIONS, SET_REVIEW_COLOR_ORDER
 from core.game_concepts.card import Card
 
 T = TypeVar('T')
@@ -19,6 +20,10 @@ def weave_lists(l1: list[T], l2: list[T]) -> list[T]:
     if len(l1) != len(l2):
         raise ValueError("List length must be equal!")
     return list(chain.from_iterable(zip(l1, l2)))
+
+
+def set_review_color_sort(card_1: Card, card_2: Card):
+    return SET_REVIEW_COLOR_ORDER[card_1.color_identity] - SET_REVIEW_COLOR_ORDER[card_2.color_identity]
 
 
 def split_by_rarities(card_list: list[Card]):
@@ -41,7 +46,11 @@ def sort_for_day_one(cards: list[Card]) -> list[Card]:
     commons_by_color = split_by_color(commons)
     uncommons_by_color = split_by_color(uncommons)
 
-    lands = flatten_lists([commons_by_color[0], uncommons_by_color[0]])
+    key = cmp_to_key(set_review_color_sort)
+    common_lands = sorted(commons_by_color[0], key=key)
+    uncommon_lands = sorted(uncommons_by_color[0], key=key)
+    lands = flatten_lists([common_lands, uncommon_lands])
+
     colorless = flatten_lists([commons_by_color[1], uncommons_by_color[1]])
     single_colored = flatten_lists(weave_lists(commons_by_color[2:7], uncommons_by_color[2:7]))
     signposts = flatten_lists(weave_lists(commons_by_color[7:], uncommons_by_color[7:]))
