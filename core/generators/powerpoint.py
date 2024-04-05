@@ -20,12 +20,12 @@ class PowerPointGenerator:
         self.expansion = expansion
         self.bonus_sheet = bonus_sheet
         self.card_cache = card_cache
+        # TODO: See if this can be moved into the cache object.
         self.day_one_cards, self.day_two_cards = order(self.card_cache, self.expansion, self.bonus_sheet)
 
     def generate_powerpoint(self, output_dir: str = '.'):
         path = Path(output_dir)
         path.mkdir(parents=True, exist_ok=True)
-        path.joinpath()
 
         day_one_file_name = f"{self.expansion} - Commons and Uncommons.pptx"
         pptx.gen_powerpoint(
@@ -41,6 +41,8 @@ class PowerPointGenerator:
         )
         print(f"Created file '{day_two_file_name}'!")
 
+    # TODO: See if this can be moved into the cache object.
+    @property
     def sorted_card_list(self) -> list[Card]:
         return self.day_one_cards + self.day_two_cards
 
@@ -56,7 +58,7 @@ def main(
 
     if print_card_list:
         print("Cards: ")
-        for card in generator.sorted_card_list():
+        for card in generator.sorted_card_list:
             print(repr(card))
         print(" - - - - - - - - - - \n")
 
