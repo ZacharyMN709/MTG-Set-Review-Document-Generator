@@ -16,6 +16,26 @@ class PowerPointGenerator:
     day_one_cards: list[Card]
     day_two_cards: list[Card]
 
+    @classmethod
+    def create_set_review(
+            cls,
+            expansion: str,
+            bonus_sheet: Optional[str],
+            card_cache: CardCache,
+            print_card_list: bool = False
+    ):
+        generator = PowerPointGenerator(expansion, bonus_sheet, card_cache)
+
+        if print_card_list:
+            print("Cards: ")
+            for card in generator.sorted_card_list:
+                print(repr(card))
+            print(" - - - - - - - - - - \n")
+
+        # TODO: Better handle output path logic.
+        generator.generate_powerpoint(os.path.join(f'../../Generated Documents', expansion.upper()))
+        return generator
+
     def __init__(self, expansion: str, bonus_sheet: Optional[str], card_cache: CardCache):
         self.expansion = expansion
         self.bonus_sheet = bonus_sheet
@@ -54,29 +74,24 @@ def main(
         print_card_list: bool = False
 ) -> PowerPointGenerator:
     cache = CardCache.from_queries(*queries)
-    generator = PowerPointGenerator(expansion, bonus_sheet, cache)
-
-    if print_card_list:
-        print("Cards: ")
-        for card in generator.sorted_card_list:
-            print(repr(card))
-        print(" - - - - - - - - - - \n")
-
-    generator.generate_powerpoint(os.path.join('../../Generated Documents', expansion.upper()))
-    return generator
+    return PowerPointGenerator.create_set_review(expansion, bonus_sheet, cache, print_card_list)
 
 
-if __name__ == "__main__":
-    MAIN_EXPANSION = 'OTJ'
-    BONUS_SHEET = 'OTP'
-    QUERIES = [
+def otj():
+    set_code = 'OTJ'
+    bonus_set_code = 'OTP'
+    scryfall_queries = [
         'set:otj unique:cards',
         'set:otp unique:cards',
         'set:big unique:cards',
         '(set:spg and date=otj) unique:cards'
     ]
 
-    main(MAIN_EXPANSION, BONUS_SHEET, *QUERIES, print_card_list=True)
+    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
+
+
+if __name__ == "__main__":
+    otj()
 
 
 
