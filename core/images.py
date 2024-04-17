@@ -15,15 +15,14 @@ class ImageProcessor:
 
     @classmethod
     def generate_slide_image(cls, card: Card) -> Image.Image:
-        if not card.back_image_url:
-            return cls.get_face_image(card.front_image_url)
-
         front_image = cls.get_face_image(card.front_image_url)
+        if "Battle" in card.all_types or card.layout == "split":
+            front_image = front_image.rotate(270, expand=True)
+
+        if not card.back_image_url:
+            return front_image
+
         back_image = cls.get_face_image(card.back_image_url)
-
-        if "Battle" in card.all_types:
-            front_image = front_image.rotate(270, expand=True)  # Rotate image by -90 degrees
-
         merge_image_size = (front_image.size[0] + back_image.size[0], max(front_image.size[1], back_image.size[1]))
         merged_image = Image.new("RGBA", merge_image_size, (255, 255, 255, 255))
 
