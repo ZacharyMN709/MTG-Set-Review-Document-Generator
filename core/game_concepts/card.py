@@ -79,6 +79,12 @@ class Card:
 
         self.layout = self._parse_from_json('layout')
 
+        # NOTE: Some custom handling has to be done to identify aftermath card frames.
+        if self.layout == 'split':
+            keywords = self._parse_from_json('keywords')
+            if 'Aftermath' in keywords:
+                self.layout = 'aftermath'
+
     def _populate_collector_data(self):
         self.scryfall_id = self._json['id']
         self.expansion = self._json['set'].upper()
@@ -105,7 +111,7 @@ class Card:
         self.subtypes = self.all_types & SUBTYPES
 
     def _populate_image_data(self):
-        if self.layout in {'adventure', 'split'}:
+        if self.layout in {'adventure', 'split', 'aftermath', 'flip'}:
             self.front_image_url = self._get_image_url(self._json)
             self.back_image_url = None
         else:
