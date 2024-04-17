@@ -33,7 +33,7 @@ class PowerPointGenerator:
             print(" - - - - - - - - - - \n")
 
         # TODO: Better handle output path logic.
-        generator.generate_powerpoint(os.path.join(f'../../Generated Documents', expansion.upper()))
+        generator.generate_powerpoints(os.path.join(f'../../Generated Documents', expansion.upper()))
         return generator
 
     def __init__(self, expansion: str, bonus_sheet: Optional[str], card_cache: CardCache):
@@ -43,7 +43,7 @@ class PowerPointGenerator:
         # TODO: See if this can be moved into the cache object.
         self.day_one_cards, self.day_two_cards = order(self.card_cache, self.expansion, self.bonus_sheet)
 
-    def generate_powerpoint(self, output_dir: str = '.'):
+    def generate_powerpoints(self, output_dir: str = '.'):
         path = Path(output_dir)
         path.mkdir(parents=True, exist_ok=True)
 
@@ -90,8 +90,40 @@ def otj():
     main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
 
 
+def debug():
+    file_name = "Test.pptx"
+    cache = CardCache.from_card_keys(
+        # TODO: Come up with more comprehensive test suite of cards.
+        ("MOM", "Captive Weird"),
+        ("MOM", "Invasion of Kaladesh"),
+        ("MOM", "Joyful Stormsculptor"),
+        ("HOU", "Refuse // Cooperate"),
+        ("GRN", "Expansion // Explosion"),
+        ("ELD", "Bonecrusher Giant"),
+        ("NEO", "Fable of the Mirror Breaker"),
+        ("ZNR", "Shatterskull Smashing"),
+        ("CHK", "Akki Lavarunner"),
+        ("BRO", "Skitterbeam Battalion"),
+        ("EMN", "Hanweir Garrison"), # TODO: Handle meld back faces
+    )
+    cards = cache.card_list()
+
+    for card in cards:
+        print(f"{card}: {card.layout}")
+
+    output_dir = f'../../Generated Documents/Debug'
+    path = Path(output_dir)
+    path.mkdir(parents=True, exist_ok=True)
+
+    pptx.gen_powerpoint(
+        os.path.join(output_dir, file_name),
+        ImageProcessor.image_generator(cards)
+    )
+    print(f"Created file '{file_name}'!")
+
+
 if __name__ == "__main__":
-    otj()
+    debug()
 
 
 

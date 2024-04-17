@@ -6,6 +6,9 @@ import logging
 from core.scryfall import Scryfall
 from core.game_concepts.card import Card
 
+# TODO: Explain that this is SET - NAME, likely through annotations
+CardKey = tuple[str, str]
+
 
 class CardCache:
     @classmethod
@@ -19,6 +22,14 @@ class CardCache:
     def from_queries(cls, *queries: str):
         card_cache = cls()
         for query in queries:
+            card_cache.populate_cache_by_query(query)
+        return card_cache
+
+    @classmethod
+    def from_card_keys(cls, *keys: CardKey):
+        card_cache = cls()
+        for key in keys:
+            query = f"(s:{key[0]} and name={key[1]})"
             card_cache.populate_cache_by_query(query)
         return card_cache
 
