@@ -1,0 +1,16 @@
+{
+  "set_context": {
+    "set_code": "OTJ",
+    "bonus_set_code": "OTP",
+    "scryfall_queries": [
+      "set:otj unique:cards",
+      "set:otp unique:cards",
+      "set:big unique:cards",
+      "(set:spg and date=otj) unique:cards"
+    ]
+  },
+  "document_context": {
+    "reviewers" : ["Alex", "Mark"],
+    "output_root": "Generated Documents"
+  }
+}
