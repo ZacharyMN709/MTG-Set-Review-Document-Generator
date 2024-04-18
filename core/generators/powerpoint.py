@@ -8,9 +8,8 @@ from pptx.util import Cm
 from pptx.presentation import Presentation
 from PIL.Image import Image
 
-from core.caching import CardCache
+from core.caching import SetContext, CardCache
 from core.game_concepts.card import Card
-from core.game_concepts.ordering import order
 
 
 class ImageSetPowerpoint:
@@ -70,21 +69,11 @@ class ImageSetPowerpoint:
 
 
 class PowerPointGenerator:
-    expansion: str
-    bonus_sheet: Optional[str]
-    card_cache: CardCache
-    day_one_cards: list[Card]
-    day_two_cards: list[Card]
+    set_context: SetContext
 
     @classmethod
-    def create_set_review(
-            cls,
-            expansion: str,
-            bonus_sheet: Optional[str],
-            card_cache: CardCache,
-            print_card_list: bool = False
-    ):
-        generator = PowerPointGenerator(expansion, bonus_sheet, card_cache)
+    def create_set_review(cls, set_context: SetContext, print_card_list: bool = False):
+        generator = PowerPointGenerator(set_context)
 
         if print_card_list:
             print("Cards: ")
@@ -93,37 +82,32 @@ class PowerPointGenerator:
             print(" - - - - - - - - - - \n")
 
         # TODO: Better handle output path logic.
-        generator.generate_powerpoints(os.path.join(f'../../Generated Documents', expansion.upper()))
+        generator.generate_powerpoints(os.path.join(f'../../Generated Documents', set_context.set_code.upper()))
         return generator
 
-    def __init__(self, expansion: str, bonus_sheet: Optional[str], card_cache: CardCache):
-        self.expansion = expansion
-        self.bonus_sheet = bonus_sheet
-        self.card_cache = card_cache
-        # TODO: See if this can be moved into the cache object.
-        self.day_one_cards, self.day_two_cards = order(self.card_cache, self.expansion, self.bonus_sheet)
+    def __init__(self, set_context: SetContext):
+        self.set_context = set_context
 
     def generate_powerpoints(self, output_dir: str = '.'):
-        day_one_file_name = f"{self.expansion} - Commons and Uncommons.pptx"
+        day_one_file_name = f"{self.set_context.set_code} - Commons and Uncommons.pptx"
         ImageSetPowerpoint.from_image_list(
             day_one_file_name,
             output_dir,
-            (card.full_card_image for card in self.day_one_cards)
+            (card.full_card_image for card in self.set_context.day_one_cards)
         )
         print(f"Created file '{day_one_file_name}'!")
 
-        day_two_file_name = f"{self.expansion} - Rares and Mythics.pptx"
+        day_two_file_name = f"{self.set_context.set_code} - Rares and Mythics.pptx"
         ImageSetPowerpoint.from_image_list(
             day_two_file_name,
             output_dir,
-            (card.full_card_image for card in self.day_two_cards)
+            (card.full_card_image for card in self.set_context.day_two_cards)
         )
         print(f"Created file '{day_two_file_name}'!")
 
-    # TODO: See if this can be moved into the cache object.
     @property
     def sorted_card_list(self) -> list[Card]:
-        return self.day_one_cards + self.day_two_cards
+        return self.set_context.sorted_card_list
 
 
 def main(
@@ -132,8 +116,8 @@ def main(
         *queries: str,
         print_card_list: bool = False
 ) -> PowerPointGenerator:
-    cache = CardCache.from_queries(*queries)
-    return PowerPointGenerator.create_set_review(expansion, bonus_sheet, cache, print_card_list)
+    context = SetContext.from_queries(expansion, bonus_sheet, *queries)
+    return PowerPointGenerator.create_set_review(context, print_card_list)
 
 
 def otj():

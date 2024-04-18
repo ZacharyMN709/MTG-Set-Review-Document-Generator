@@ -4,25 +4,16 @@ import os
 from pathlib import Path
 import pandas as pd
 
-from core.caching import CardCache
+from core.caching import SetContext
 from core.game_concepts.card import Card
-from core.game_concepts.ordering import order
 
 
 class ExcelGenerator:
-    expansion: str
-    bonus_sheet: Optional[str]
-    card_cache: CardCache
-    day_one_cards: list[Card]
-    day_two_cards: list[Card]
+    set_context: SetContext
 
-    def __init__(self, expansion: str, bonus_sheet: Optional[str], card_cache: CardCache, reviewers: list[str]):
-        self.expansion = expansion
-        self.bonus_sheet = bonus_sheet
-        self.card_cache = card_cache
+    def __init__(self, set_context: SetContext, reviewers: list[str]):
+        self.set_context = set_context
         self.reviewers = reviewers
-        # TODO: See if this can be moved into the cache object.
-        self.day_one_cards, self.day_two_cards = order(self.card_cache, self.expansion, self.bonus_sheet)
 
     def gen_dict_from_card(self, card: Card) -> dict[str, Any]:
         sanitized_name = card.name.replace('"', '')
@@ -44,16 +35,15 @@ class ExcelGenerator:
         path.mkdir(parents=True, exist_ok=True)
         path.joinpath()
 
-        file_name = f"{self.expansion} - Grades.xlsx"
-        records = [self.gen_dict_from_card(card) for card in self.day_one_cards + self.day_two_cards]
+        file_name = f"{self.set_context.set_code} - Grades.xlsx"
+        records = [self.gen_dict_from_card(card) for card in self.set_context.sorted_card_list]
         frame = pd.DataFrame.from_records(records)
         frame.to_excel(os.path.join(output_dir, file_name))
         print(f"Created file '{file_name}'!")
 
-    # TODO: See if this can be moved into the cache object.
     @property
     def sorted_card_list(self) -> list[Card]:
-        return self.day_one_cards + self.day_two_cards
+        return self.set_context.sorted_card_list
 
 
 def main(
@@ -63,8 +53,8 @@ def main(
         *queries: str,
         print_card_list: bool = False
 ) -> ExcelGenerator:
-    cache = CardCache.from_queries(*queries)
-    generator = ExcelGenerator(expansion, bonus_sheet, cache, reviewers)
+    context = SetContext.from_queries(expansion, bonus_sheet, *queries)
+    generator = ExcelGenerator(context, reviewers)
 
     if print_card_list:
         print("Cards: ")
@@ -77,15 +67,16 @@ def main(
 
 
 if __name__ == "__main__":
-    MAIN_EXPANSION = 'OTJ'
-    BONUS_SHEET = 'OTP'
     REVIEWERS = ['Alex', 'Marc']
-    QUERIES = [
+
+    set_code = 'OTJ'
+    bonus_set_code = 'OTP'
+    scryfall_queries = [
         'set:otj unique:cards',
         'set:otp unique:cards',
         'set:big unique:cards',
         '(set:spg and date=otj) unique:cards'
     ]
 
-    main(MAIN_EXPANSION, BONUS_SHEET, REVIEWERS, *QUERIES, print_card_list=True)
+    main(set_code, bonus_set_code, REVIEWERS, *scryfall_queries, print_card_list=True)
 
