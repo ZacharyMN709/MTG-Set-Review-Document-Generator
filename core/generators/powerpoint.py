@@ -8,7 +8,8 @@ from pptx.util import Cm
 from pptx.presentation import Presentation
 from PIL.Image import Image
 
-from core.caching import SetContext, CardCache
+from core.data.caching import CardCache
+from core.data.set_context import SetContext
 from core.game_concepts.card import Card
 
 

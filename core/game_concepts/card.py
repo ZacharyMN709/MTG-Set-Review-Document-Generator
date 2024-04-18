@@ -174,7 +174,7 @@ class Card:
 
 
 if __name__ == "__main__":
-    from core.caching import CardCache
+    from core.data.caching import CardCache
 
     card_cache = CardCache()
 

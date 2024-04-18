@@ -3,7 +3,7 @@ from typing import TypeVar, Optional, Iterable
 from itertools import chain
 from functools import cmp_to_key
 
-from core.caching import CardCache
+from core.data.caching import CardCache
 from core.game_concepts.colors import GROUP_COLOR_COMBINATIONS, SET_REVIEW_COLOR_ORDER
 from core.game_concepts.card import Card
 
