@@ -1,5 +1,10 @@
 from typing import Optional
 import logging
+import requests
+from time import sleep
+from io import BytesIO
+
+from PIL import Image
 
 from core.game_concepts.card_types import SUPERTYPES, TYPES, SUBTYPES
 from core.game_concepts.colors import parse_color_list, get_color_identity
@@ -123,6 +128,43 @@ class Card:
     def card_url(self) -> str:
         """Shortened link to the Scryfall page for the card"""
         return f"https://scryfall.com/card/{self.expansion.lower()}/{self.number}"
+
+    @classmethod
+    def _get_face_image(cls, url: str) -> Optional[Image.Image]:
+        if url:
+            sleep(0.1)  # Scryfall requests this, so I try to be a good netizen.
+            image_data = requests.get(url).content
+            return Image.open(BytesIO(image_data))
+        else:
+            return None
+
+    @property
+    def front_image(self) -> Image.Image:
+        image = self._get_face_image(self.front_image_url)
+        if "Battle" in self.all_types or self.layout == "split":
+            image = image.rotate(270, expand=True)
+        return image
+
+    @property
+    def back_image(self) -> Optional[Image.Image]:
+        return self._get_face_image(self.back_image_url)
+
+    @property
+    def full_card_image(self) -> Image.Image:
+        if not self.back_image:
+            return self.front_image
+
+        merge_image_size = (
+            self.front_image.size[0] + self.back_image.size[0],
+            max(self.front_image.size[1], self.back_image.size[1])
+        )
+        merged_image = Image.new("RGBA", merge_image_size, (255, 255, 255, 255))
+
+        front_image_location = (0, (merged_image.size[1] - self.front_image.size[1]) // 2)
+        back_image_location = (self.front_image.size[0], (merged_image.size[1] - self.back_image.size[1]) // 2)
+        merged_image.paste(self.front_image, front_image_location)
+        merged_image.paste(self.back_image, back_image_location)
+        return merged_image
 
     def __str__(self):
         return self.full_name
