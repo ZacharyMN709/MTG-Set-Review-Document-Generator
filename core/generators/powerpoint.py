@@ -1,12 +1,92 @@
-from typing import Optional
+from typing import Optional, Iterable
 import os
 from pathlib import Path
+import tempfile
+from io import BytesIO
 
+from pptx import Presentation as NewPresentation
+from pptx.util import Cm
+from pptx.presentation import Presentation
+from PIL.Image import Image
+from PIL import Image
+
+from core.scryfall import Scryfall
 from core.caching import CardCache
-from core.images import ImageProcessor
-from core.documents import pptx
 from core.game_concepts.card import Card
 from core.game_concepts.ordering import order
+
+
+SLIDE_HEIGHT = 19.05
+SLIDE_WIDTH = 25.40
+
+SCRYFALL_DPI = 96
+INCH_TO_CM = 2.54
+MINIMUM_MARGIN = 2
+
+
+def new_powerpoint_from_images(file_name: str, card_images: Iterable[Image]):
+    presentation = NewPresentation()
+    for image in card_images:
+        add_centered_image_slide(presentation, image)
+    presentation.save(file_name)
+
+
+def add_centered_image_slide(presentation: Presentation, image: Image):
+    image_width = (image.size[0] / SCRYFALL_DPI) * INCH_TO_CM
+    image_height = (image.size[1] / SCRYFALL_DPI) * INCH_TO_CM
+    width_ratio = image_width / (SLIDE_WIDTH - MINIMUM_MARGIN * 2)
+    height_ratio = image_height / (SLIDE_HEIGHT - MINIMUM_MARGIN * 2)
+    is_landscape = width_ratio >= height_ratio
+
+    if is_landscape:
+        new_image_width = image_width / width_ratio
+        new_image_height = image_height / width_ratio
+    else:
+        new_image_width = image_width / height_ratio
+        new_image_height = image_height / height_ratio
+
+    x_position = (SLIDE_WIDTH - new_image_width) / 2
+    y_position = (SLIDE_HEIGHT - new_image_height) / 2
+
+    temporary_image_file = tempfile.NamedTemporaryFile(suffix=".png")
+    image.save(temporary_image_file)
+
+    blank_slide_layout = presentation.slide_layouts[6]
+    slide = presentation.slides.add_slide(blank_slide_layout)
+    slide.shapes.add_picture(
+        temporary_image_file, Cm(x_position), Cm(y_position), width=Cm(new_image_width), height=Cm(new_image_height)
+    )
+
+
+class ImageProcessor:
+    @classmethod
+    def get_face_image(cls, url: str) -> Image.Image:
+        image_data = Scryfall.request(url).content
+        return Image.open(BytesIO(image_data))
+
+    @classmethod
+    def generate_slide_image(cls, card: Card) -> Image.Image:
+        front_image = cls.get_face_image(card.front_image_url)
+        if "Battle" in card.all_types or card.layout == "split":
+            front_image = front_image.rotate(270, expand=True)
+
+        if not card.back_image_url:
+            return front_image
+
+        back_image = cls.get_face_image(card.back_image_url)
+        merge_image_size = (front_image.size[0] + back_image.size[0], max(front_image.size[1], back_image.size[1]))
+        merged_image = Image.new("RGBA", merge_image_size, (255, 255, 255, 255))
+
+        front_image_location = (0, (merged_image.size[1] - front_image.size[1]) // 2)
+        back_image_location = (front_image.size[0], (merged_image.size[1] - back_image.size[1]) // 2)
+        merged_image.paste(front_image, front_image_location)
+        merged_image.paste(back_image, back_image_location)
+        return merged_image
+
+    @classmethod
+    def image_generator(cls, cards: Iterable[Card]):
+        for card in cards:
+            yield cls.generate_slide_image(card)
 
 
 class PowerPointGenerator:
@@ -48,14 +128,14 @@ class PowerPointGenerator:
         path.mkdir(parents=True, exist_ok=True)
 
         day_one_file_name = f"{self.expansion} - Commons and Uncommons.pptx"
-        pptx.gen_powerpoint(
+        new_powerpoint_from_images(
             os.path.join(output_dir, day_one_file_name),
             ImageProcessor.image_generator(self.day_one_cards)
         )
         print(f"Created file '{day_one_file_name}'!")
 
         day_two_file_name = f"{self.expansion} - Rares and Mythics.pptx"
-        pptx.gen_powerpoint(
+        new_powerpoint_from_images(
             os.path.join(output_dir, day_two_file_name),
             ImageProcessor.image_generator(self.day_two_cards)
         )
@@ -115,7 +195,7 @@ def debug():
     path = Path(output_dir)
     path.mkdir(parents=True, exist_ok=True)
 
-    pptx.gen_powerpoint(
+    new_powerpoint_from_images(
         os.path.join(output_dir, file_name),
         ImageProcessor.image_generator(cards)
     )
