@@ -1,0 +1,14 @@
+{
+  "set_context": {
+    "set_code": "MH3",
+    "scryfall_queries": [
+      "set:mh3 unique:cards",
+      "(set:spg and date=mh3) unique:cards",
+      "(game:paper) set:m3c t:legendary t:creature -is:reprint"
+    ]
+  },
+  "document_context": {
+    "reviewers" : ["Alex", "Mark"],
+    "output_root": "Generated Documents"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "set_context": {
+    "set_code": "BLB",
+    "scryfall_queries": [
+      "set:blb unique:cards cn<=261",
+      "(set:spg and date=blb) unique:cards"
+    ]
+  },
+  "document_context": {
+    "reviewers" : ["Alex", "Mark"],
+    "output_root": "Generated Documents"
+  }
+}
