@@ -69,5 +69,5 @@ if __name__ == "__main__":
         "(set:spg and date=blb) unique:cards",
     ]
 
-    main(set_code, bonus_set_code, REVIEWERS, *scryfall_queries, print_card_list=True)
+    main(set_code, bonus_set_code, REVIEWERS, *scryfall_queries, print_card_list=False)
 

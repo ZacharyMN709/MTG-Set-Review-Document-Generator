@@ -124,7 +124,7 @@ def otj():
         '(set:spg and date=otj) unique:cards'
     ]
 
-    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
+    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=False)
 
 
 def mh3():
@@ -136,7 +136,7 @@ def mh3():
         "(game:paper) set:m3c t:legendary t:creature -is:reprint",
     ]
 
-    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
+    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=False)
 
 
 def blb():
@@ -147,7 +147,7 @@ def blb():
         "(set:spg and date=blb) unique:cards",
     ]
 
-    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
+    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=False)
 
 
 def debug():
