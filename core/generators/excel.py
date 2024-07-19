@@ -62,13 +62,11 @@ def main(
 if __name__ == "__main__":
     REVIEWERS = ['Alex', 'Marc']
 
-    set_code = 'OTJ'
-    bonus_set_code = 'OTP'
+    set_code = 'BLB'
+    bonus_set_code = None
     scryfall_queries = [
-        'set:otj unique:cards',
-        'set:otp unique:cards',
-        'set:big unique:cards',
-        '(set:spg and date=otj) unique:cards'
+        "set:blb unique:cards and cn<=261",
+        "(set:spg and date=blb) unique:cards",
     ]
 
     main(set_code, bonus_set_code, REVIEWERS, *scryfall_queries, print_card_list=True)

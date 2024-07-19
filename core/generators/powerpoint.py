@@ -127,6 +127,29 @@ def otj():
     main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
 
 
+def mh3():
+    set_code = 'MH3'
+    bonus_set_code = None
+    scryfall_queries = [
+        "set:mh3 unique:cards",
+        "(set:spg and date=mh3) unique:cards",
+        "(game:paper) set:m3c t:legendary t:creature -is:reprint",
+    ]
+
+    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
+
+
+def blb():
+    set_code = 'BLB'
+    bonus_set_code = None
+    scryfall_queries = [
+        "set:blb unique:cards cn<=261",
+        "(set:spg and date=blb) unique:cards",
+    ]
+
+    main(set_code, bonus_set_code, *scryfall_queries, print_card_list=True)
+
+
 def debug():
     file_name = "Test.pptx"
     cache = CardCache.from_card_keys(
@@ -161,7 +184,7 @@ def debug():
 
 
 if __name__ == "__main__":
-    debug()
+    blb()
 
 
 
