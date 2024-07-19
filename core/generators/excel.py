@@ -53,15 +53,8 @@ def main(
         *queries: str,
         print_card_list: bool = False
 ) -> ExcelGenerator:
-    context = SetContext.from_queries(expansion, bonus_sheet, *queries)
+    context = SetContext.from_queries(expansion, bonus_sheet, *queries, print_card_list=print_card_list)
     generator = ExcelGenerator(context, reviewers)
-
-    if print_card_list:
-        print("Cards: ")
-        for card in generator.sorted_card_list:
-            print(repr(card))
-        print(" - - - - - - - - - - \n")
-
     generator.generate_spreadsheet(os.path.join('../../Generated Documents', expansion.upper()))
     return generator
 

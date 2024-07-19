@@ -12,19 +12,19 @@ class SetContext:
     _day_two_cards: list[Card]
 
     @classmethod
-    def from_expansions(cls, set_code: str, bonus_set_code: str, *expansions: str):
+    def from_expansions(cls, set_code: str, bonus_set_code: str, *expansions: str, print_card_list: bool = False):
         card_cache = CardCache.from_expansions(*expansions)
-        return cls(set_code, bonus_set_code, card_cache)
+        return cls(set_code, bonus_set_code, card_cache, print_card_list)
 
     @classmethod
-    def from_queries(cls, set_code: str, bonus_set_code: str, *queries: str):
+    def from_queries(cls, set_code: str, bonus_set_code: str, *queries: str, print_card_list: bool = False):
         card_cache = CardCache.from_queries(*queries)
-        return cls(set_code, bonus_set_code, card_cache)
+        return cls(set_code, bonus_set_code, card_cache, print_card_list)
 
     @classmethod
-    def from_card_keys(cls, set_code: str, bonus_set_code: str, *keys: CardKey):
+    def from_card_keys(cls, set_code: str, bonus_set_code: str, *keys: CardKey, print_card_list: bool = False):
         card_cache = CardCache.from_card_keys(*keys)
-        return cls(set_code, bonus_set_code, card_cache)
+        return cls(set_code, bonus_set_code, card_cache, print_card_list)
 
     @classmethod
     def from_config(cls):
@@ -34,13 +34,21 @@ class SetContext:
         queries = list()
         return cls.from_queries(set_code, bonus_set_code, *queries)
 
-    def __init__(self, set_code: str, bonus_set_code: str, card_cache: CardCache):
+    def __init__(self, set_code: str, bonus_set_code: str, card_cache: CardCache, print_card_list: bool = False):
         self.set_code = set_code
         self.bonus_set_code = bonus_set_code
         self.card_cache = card_cache
         self._day_one_cards, self._day_two_cards = list(), list()
 
         self.card_cache.on_edit = self.on_cache_update
+
+        print(f"Loaded {len(card_cache)} cards for '{set_code}'")
+
+        if print_card_list:
+            print("Cards: ")
+            for card in self.sorted_card_list:
+                print(repr(card))
+            print(" - - - - - - - - - - \n")
 
     def get_card_orders(self):
         self._day_one_cards, self._day_two_cards = order(self.card_cache, self.set_code, self.bonus_set_code)

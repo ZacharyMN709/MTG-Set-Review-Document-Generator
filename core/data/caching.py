@@ -122,3 +122,5 @@ class CardCache:
         else:
             return list(self._card_cache.values())
 
+    def __len__(self):
+        return len(self._card_cache)

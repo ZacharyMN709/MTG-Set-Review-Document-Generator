@@ -73,15 +73,8 @@ class PowerPointGenerator:
     set_context: SetContext
 
     @classmethod
-    def create_set_review(cls, set_context: SetContext, print_card_list: bool = False):
+    def create_set_review(cls, set_context: SetContext):
         generator = PowerPointGenerator(set_context)
-
-        if print_card_list:
-            print("Cards: ")
-            for card in generator.sorted_card_list:
-                print(repr(card))
-            print(" - - - - - - - - - - \n")
-
         # TODO: Better handle output path logic.
         generator.generate_powerpoints(os.path.join(f'../../Generated Documents', set_context.set_code.upper()))
         return generator
@@ -117,8 +110,8 @@ def main(
         *queries: str,
         print_card_list: bool = False
 ) -> PowerPointGenerator:
-    context = SetContext.from_queries(expansion, bonus_sheet, *queries)
-    return PowerPointGenerator.create_set_review(context, print_card_list)
+    context = SetContext.from_queries(expansion, bonus_sheet, *queries, print_card_list=print_card_list)
+    return PowerPointGenerator.create_set_review(context)
 
 
 def otj():
