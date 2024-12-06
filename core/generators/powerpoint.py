@@ -165,6 +165,7 @@ def debug():
         ("CHK", "Akki Lavarunner"),
         ("BRO", "Skitterbeam Battalion"),
         ("EMN", "Hanweir Garrison"),  # TODO: Handle meld back faces
+        ("DSK", "Smoky Lounge // Misty Salon"),
     )
     cards = cache.card_list()
 

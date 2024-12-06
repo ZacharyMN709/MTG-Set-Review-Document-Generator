@@ -1,0 +1,13 @@
+{
+  "set_context": {
+    "set_code": "DSK",
+    "scryfall_queries": [
+      "set:dsk unique:cards cn<=271",
+      "(set:spg and date=dsk) unique:cards"
+    ]
+  },
+  "document_context": {
+    "reviewers" : ["Alex", "Mark"],
+    "output_root": "Generated Documents"
+  }
+}
